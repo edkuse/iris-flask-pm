@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}New User Story{% endblock %}
+{% block header %}Create User Story{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">User Story Details</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Create a new user story using the format: As a [role], I want [goal] so that [benefit].</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('user_stories.new') }}">
+            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="sm:col-span-6">
+                        <label for="title" class="block text-sm font-medium text-gray-700">Story Title</label>
+                        <div class="mt-1">
+                            <input type="text" name="title" id="title" required
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="role" class="block text-sm font-medium text-gray-700">As a... (Role)</label>
+                        <div class="mt-1">
+                            <input type="text" name="role" id="role" required
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                placeholder="e.g., user, administrator, customer">
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Who is the user or stakeholder for this story?</p>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="goal" class="block text-sm font-medium text-gray-700">I want to... (Goal)</label>
+                        <div class="mt-1">
+                            <textarea id="goal" name="goal" rows="2" required
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                                placeholder="e.g., log in using my social media accounts"></textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">What does the user want to accomplish?</p>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="benefit" class="block text-sm font-medium text-gray-700">So that... (Benefit)</label>
+                        <div class="mt-1">
+                            <textarea id="benefit" name="benefit" rows="2" required
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"
+                                placeholder="e.g., I don't have to remember another password"></textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">What is the value or benefit to the user?</p>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                        <select id="priority" name="priority" 
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select id="status" name="status" 
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="backlog" selected>Backlog</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="epic_id" class="block text-sm font-medium text-gray-700">Epic</label>
+                        <select id="epic_id" name="epic_id" 
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="">None</option>
+                            {% for epic in epics %}
+                            <option value="{{ epic.id }}" {% if epic_id and epic_id|int == epic.id %}selected{% endif %}>{{ epic.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-2 text-sm text-gray-500">Associate this user story with an epic (optional)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                <a href="{{ url_for('user_stories.index') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2">
+                    Cancel
+                </a>
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Save User Story
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

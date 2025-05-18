@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}User Stories{% endblock %}
+{% block header %}User Stories{% if epic %} for {{ epic.title }}{% endif %}{% endblock %}
+
+{% block styles %}
+<style>
+    .story-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .story-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .story-container {
+        min-height: 12rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-xl font-bold text-gray-900">User Stories</h2>
+        {% if epic %}
+        <p class="text-sm text-gray-500">Stories for Epic: {{ epic.title }}</p>
+        {% endif %}
+    </div>
+    <div>
+        <a href="{{ url_for('user_stories.new', epic_id=epic.id if epic else None) }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Add User Story
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+    <!-- Backlog Column -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+            <h3 class="text-sm font-medium text-gray-700 uppercase">Backlog</h3>
+        </div>
+        <div class="p-4">
+            <div class="space-y-3 story-container" id="backlog-container" data-status="backlog">
+                {% for story in stories if story.status.value == 'backlog' %}
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-move story-card" data-id="{{ story.id }}">
+                    <div class="flex justify-between items-start">
+                        <h4 class="text-sm font-medium text-gray-900">{{ story.title }}</h4>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {{ story.priority }}
+                        </span>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-600">As a {{ story.role }}, I want {{ story.goal }} so that {{ story.benefit }}</p>
+                    <div class="mt-3 flex justify-between items-center">
+                        <span class="text-xs text-gray-500">ID: {{ story.id }}</span>
+                        <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- In Progress Column -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+            <h3 class="text-sm font-medium text-gray-700 uppercase">In Progress</h3>
+        </div>
+        <div class="p-4">
+            <div class="space-y-3 story-container" id="in-progress-container" data-status="in_progress">
+                {% for story in stories if story.status.value == 'in_progress' %}
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-move story-card" data-id="{{ story.id }}">
+                    <div class="flex justify-between items-start">
+                        <h4 class="text-sm font-medium text-gray-900">{{ story.title }}</h4>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            {{ story.priority }}
+                        </span>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-600">As a {{ story.role }}, I want {{ story.goal }} so that {{ story.benefit }}</p>
+                    <div class="mt-3 flex justify-between items-center">
+                        <span class="text-xs text-gray-500">ID: {{ story.id }}</span>
+                        <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Done Column -->
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-4 py-3 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+            <h3 class="text-sm font-medium text-gray-700 uppercase">Done</h3>
+        </div>
+        <div class="p-4">
+            <div class="space-y-3 story-container" id="done-container" data-status="done">
+                {% for story in stories if story.status.value == 'done' %}
+                <div class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm cursor-move story-card" data-id="{{ story.id }}">
+                    <div class="flex justify-between items-start">
+                        <h4 class="text-sm font-medium text-gray-900">{{ story.title }}</h4>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {{ story.priority }}
+                        </span>
+                    </div>
+                    <p class="mt-1 text-sm text-gray-600">As a {{ story.role }}, I want {{ story.goal }} so that {{ story.benefit }}</p>
+                    <div class="mt-3 flex justify-between items-center">
+                        <span class="text-xs text-gray-500">ID: {{ story.id }}</span>
+                        <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize drag and drop for each container
+        const containers = document.querySelectorAll('.story-container');
+        containers.forEach(container => {
+            new Sortable(container, {
+                group: 'stories',
+                animation: 150,
+                ghostClass: 'bg-blue-50',
+                onEnd: function(evt) {
+                    const storyId = evt.item.getAttribute('data-id');
+                    const newStatus = evt.to.getAttribute('data-status');
+                    
+                    // Send update to backend
+                    fetch(`/api/user-stories/${storyId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            status: newStatus
+                        }),
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            // If update fails, refresh the page to reset the UI
+                            window.location.reload();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error updating story status:', error);
+                        window.location.reload();
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

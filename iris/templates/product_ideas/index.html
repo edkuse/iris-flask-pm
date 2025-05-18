@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Product Ideas{% endblock %}
+{% block header %}Product Ideas{% endblock %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-center">
+    <div>
+        <h2 class="text-xl font-bold text-gray-900">Product Ideas</h2>
+        <p class="text-sm text-gray-500">Capture and track product vision and strategic goals</p>
+    </div>
+    <div>
+        <a href="{{ url_for('product_ideas.new') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Add Product Idea
+        </a>
+    </div>
+</div>
+
+<div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <ul role="list" class="divide-y divide-gray-200">
+        {% for idea in ideas %}
+        <li>
+            <a href="{{ url_for('product_ideas.view', idea_id=idea.id) }}" class="block hover:bg-gray-50">
+                <div class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-blue-600 truncate">{{ idea.title }}</p>
+                        <div class="ml-2 flex-shrink-0 flex">
+                            <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-{{ 'green' if idea.impact_level == 'high' else 'yellow' if idea.impact_level == 'medium' else 'gray' }}-100 text-{{ 'green' if idea.impact_level == 'high' else 'yellow' if idea.impact_level == 'medium' else 'gray' }}-800">
+                                {{ idea.impact_level|capitalize if idea.impact_level else 'No impact level' }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-2 sm:flex sm:justify-between">
+                        <div class="sm:flex">
+                            <p class="flex items-center text-sm text-gray-500">
+                                {{ idea.description|truncate(100) }}
+                            </p>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p>
+                                Created on <time datetime="{{ idea.created_at }}">{{ idea.created_at.strftime('%b %d, %Y') }}</time>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </li>
+        {% else %}
+        <li class="px-4 py-5 sm:px-6">
+            <p class="text-sm text-gray-500">No product ideas found. Create your first one!</p>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

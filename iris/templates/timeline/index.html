@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Project Timeline{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Project Timeline</h1>
+        <div class="flex space-x-2">
+            <div class="relative inline-block">
+                <button id="filterButton" class="bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex items-center">
+                    <span>Filter</span>
+                    <svg class="ml-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div id="filterDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none z-10">
+                    <div class="py-1">
+                        <div class="px-4 py-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="filter-checkbox" data-type="epic" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">Epics</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="filter-checkbox" data-type="story" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">User Stories</span>
+                            </label>
+                        </div>
+                        <div class="px-4 py-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="filter-checkbox" data-type="task" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">Tasks</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="py-1">
+                        <div class="px-4 py-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="showCompletedCheckbox" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <span class="ml-2 text-sm text-gray-700">Show Completed Items</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="toggleViewButton" class="bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <span id="viewModeText">Compact View</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+        <ul id="timeline" class="divide-y divide-gray-200">
+            {% for item in timeline_items %}
+            <li class="timeline-item" data-type="{{ item.type }}" data-completed="{{ 'true' if item.status == 'done' else 'false' }}">
+                <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer" onclick="toggleDetails('{{ item.id }}')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            {% if item.type == 'epic' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">Epic</span>
+                            {% elif item.type == 'story' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Story</span>
+                            {% elif item.type == 'task' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Task</span>
+                            {% endif %}
+                            <p class="ml-3 text-sm font-medium text-gray-900">{{ item.title }}</p>
+                        </div>
+                        <div class="flex items-center">
+                            {% if item.status == 'backlog' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">Backlog</span>
+                            {% elif item.status == 'in_progress' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span>
+                            {% elif item.status == 'done' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Done</span>
+                            {% elif item.status == 'todo' %}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">To Do</span>
+                            {% endif %}
+                            <div class="ml-2 flex-shrink-0 flex">
+                                <p class="px-2 text-xs text-gray-500">{{ item.created_at.strftime('%b %d, %Y') }}</p>
+                            </div>
+                            <svg class="ml-2 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="details-{{ item.id }}" class="mt-4 hidden">
+                        <div class="border-t border-gray-200 pt-4">
+                            <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                                <div class="sm:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500">Description</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.description or 'No description provided' }}</dd>
+                                </div>
+                                
+                                {% if item.type == 'epic' %}
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Priority</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.priority or 'Not set' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Goal</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.goal or 'Not set' }}</dd>
+                                </div>
+                                {% if item.tags %}
+                                <div class="sm:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500">Tags</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">
+                                        <div class="flex flex-wrap gap-2">
+                                            {% for tag in item.tags %}
+                                            <span class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-800">{{ tag }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </dd>
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                                
+                                {% if item.type == 'story' %}
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Role</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.role }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Goal</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.goal }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Benefit</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.benefit }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Priority</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.priority or 'Not set' }}</dd>
+                                </div>
+                                {% endif %}
+                                
+                                {% if item.type == 'task' %}
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Assignee</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.assignee or 'Unassigned' }}</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Effort</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.effort or 'Not estimated' }}</dd>
+                                </div>
+                                {% if item.due_date %}
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">Due Date</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.due_date.strftime('%b %d, %Y') }}</dd>
+                                </div>
+                                {% endif %}
+                                {% endif %}
+                                
+                                <div class="sm:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500">Created</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.created_at.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+                                </div>
+                                
+                                {% if item.updated_at %}
+                                <div class="sm:col-span-2">
+                                    <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ item.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</dd>
+                                </div>
+                                {% endif %}
+                            </dl>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <a href="{{ item.view_url }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    {% if not timeline_items %}
+    <div class="text-center py-12">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-gray-900">No timeline items</h3>
+        <p class="mt-1 text-sm text-gray-500">Get started by creating a new epic, user story, or task.</p>
+        <div class="mt-6">
+            <a href="{{ url_for('product_ideas.new') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                New Product Idea
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Toggle filter dropdown
+    const filterButton = document.getElementById('filterButton');
+    const filterDropdown = document.getElementById('filterDropdown');
+    
+    filterButton.addEventListener('click', () => {
+        filterDropdown.classList.toggle('hidden');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (event) => {
+        if (!filterButton.contains(event.target) && !filterDropdown.contains(event.target)) {
+            filterDropdown.classList.add('hidden');
+        }
+    });
+    
+    // Toggle details
+    function toggleDetails(id) {
+        const detailsElement = document.getElementById(`details-${id}`);
+        detailsElement.classList.toggle('hidden');
+    }
+    
+    // Filter functionality
+    const filterCheckboxes = document.querySelectorAll('.filter-checkbox');
+    const showCompletedCheckbox = document.getElementById('showCompletedCheckbox');
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    
+    function applyFilters() {
+        const selectedTypes = Array.from(filterCheckboxes)
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.dataset.type);
+        
+        const showCompleted = showCompletedCheckbox.checked;
+        
+        timelineItems.forEach(item => {
+            const itemType = item.dataset.type;
+            const isCompleted = item.dataset.completed === 'true';
+            
+            const typeMatch = selectedTypes.includes(itemType);
+            const completedMatch = showCompleted || !isCompleted;
+            
+            if (typeMatch && completedMatch) {
+                item.classList.remove('hidden');
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+    }
+    
+    filterCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', applyFilters);
+    });
+    
+    showCompletedCheckbox.addEventListener('change', applyFilters);
+    
+    // Toggle view mode (compact/expanded)
+    const toggleViewButton = document.getElementById('toggleViewButton');
+    const viewModeText = document.getElementById('viewModeText');
+    const timeline = document.getElementById('timeline');
+    let isCompactView = true;
+    
+    toggleViewButton.addEventListener('click', () => {
+        isCompactView = !isCompactView;
+        
+        if (isCompactView) {
+            viewModeText.textContent = 'Compact View';
+            timeline.classList.remove('expanded-view');
+            
+            // Hide all details in compact view
+            document.querySelectorAll('[id^="details-"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+        } else {
+            viewModeText.textContent = 'Expanded View';
+            timeline.classList.add('expanded-view');
+            
+            // Show all details in expanded view
+            document.querySelectorAll('[id^="details-"]').forEach(el => {
+                el.classList.remove('hidden');
+            });
+        }
+    });
+</script>
+
+<style>
+    /* Timeline styling */
+    .timeline-item {
+        position: relative;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 20px;
+        width: 2px;
+        background-color: #e5e7eb;
+        z-index: 0;
+    }
+    
+    .timeline-item:first-child::before {
+        top: 24px;
+    }
+    
+    .timeline-item:last-child::before {
+        bottom: calc(100% - 24px);
+    }
+    
+    /* Expanded view styling */
+    .expanded-view .timeline-item {
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+    
+    .expanded-view .timeline-item:not(:last-child) {
+        margin-bottom: 1.5rem;
+    }
+</style>
+{% endblock %}

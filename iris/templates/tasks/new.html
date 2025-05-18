@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}New Task{% endblock %}
+{% block header %}Create Task{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Task Details</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Create a new task for a user story.</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('tasks.new') }}">
+            <div class="border-t border-gray-200 px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    <div class="sm:col-span-6">
+                        <label for="title" class="block text-sm font-medium text-gray-700">Task Title</label>
+                        <div class="mt-1">
+                            <input type="text" name="title" id="title" required
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <div class="mt-1">
+                            <textarea id="description" name="description" rows="3" required
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md"></textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Detailed description of what needs to be done.</p>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select id="status" name="status" 
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="todo" selected>To Do</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="review">Review</option>
+                            <option value="done">Done</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="effort" class="block text-sm font-medium text-gray-700">Effort</label>
+                        <select id="effort" name="effort" 
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            <option value="Small">Small</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="Large">Large</option>
+                            <option value="XLarge">XLarge</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="assignee" class="block text-sm font-medium text-gray-700">Assignee</label>
+                        <div class="mt-1">
+                            <input type="text" name="assignee" id="assignee"
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                value="{{ current_user.display_name }}">
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
+                        <div class="mt-1">
+                            <input type="date" name="due_date" id="due_date"
+                                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label for="story_id" class="block text-sm font-medium text-gray-700">User Story</label>
+                        <select id="story_id" name="story_id" required
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                            {% for story in stories %}
+                            <option value="{{ story.id }}" {% if story_id and story_id|int == story.id %}selected{% endif %}>{{ story.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="mt-2 text-sm text-gray-500">The user story this task belongs to</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                <a href="{{ url_for('tasks.index') }}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-2">
+                    Cancel
+                </a>
+                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Save Task
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

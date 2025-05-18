@@ -3,16 +3,16 @@ from iris.extensions import db
 from iris.models import Epic, ProductIdea, StatusEnum
 from iris.utils import flash_success
 
-epics_bp = Blueprint('epics', __name__)
+bp = Blueprint('epics', __name__, url_prefix='/epics')
 
 
-@epics_bp.route('/')
+@bp.route('/')
 def index():
     epics = Epic.query.order_by(Epic.created_at.desc()).all()
     return render_template('epics/index.html', epics=epics)
 
 
-@epics_bp.route('/new', methods=['GET', 'POST'])
+@bp.route('/new', methods=['GET', 'POST'])
 def new():
     if request.method == 'POST':
         title = request.form.get('title')
@@ -43,7 +43,7 @@ def new():
     return render_template('epics/new.html', product_ideas=product_ideas)
 
 
-@epics_bp.route('/<int:epic_id>')
+@bp.route('/<int:epic_id>')
 def view(epic_id):
     epic = Epic.query.get_or_404(epic_id)
     return render_template('epics/view.html', epic=epic)

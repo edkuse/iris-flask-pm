@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Meeting Calendar - MVNx Iris{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<style>
+    .fc-event {
+        cursor: pointer;
+    }
+    
+    .fc-toolbar-title {
+        font-size: 1.25rem !important;
+    }
+    
+    .fc-button {
+        background-color: #4f46e5 !important;
+        border-color: #4f46e5 !important;
+    }
+    
+    .fc-button:hover {
+        background-color: #4338ca !important;
+        border-color: #4338ca !important;
+    }
+    
+    .fc-button-active {
+        background-color: #3730a3 !important;
+        border-color: #3730a3 !important;
+    }
+    
+    .fc-day-today {
+        background-color: #eef2ff !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Meeting Calendar</h1>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('meetings.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Meetings
+            </a>
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    New Meeting
+                </button>
+                <div x-show="open" @click.away="open = false" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div class="py-1" role="none">
+                        <a href="{{ url_for('meetings.new_standup') }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Daily Standup</a>
+                        <a href="{{ url_for('meetings.new_retrospective') }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Sprint Retrospective</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">Meeting Schedule</h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">View and manage all scheduled meetings</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: {{ events|tojson }},
+            eventTimeFormat: {
+                hour: 'numeric',
+                minute: '2-digit',
+                meridiem: 'short'
+            },
+            eventClick: function(info) {
+                window.location.href = info.event.url;
+            },
+            height: 'auto'
+        });
+        calendar.render();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Retrospective - {{ retro.sprint.name }} - MVNx Iris{% endblock %}
+
+{% block head %}
+<style>
+    .retro-column {
+        min-height: 300px;
+    }
+    
+    .retro-item {
+        transition: all 0.2s ease-in-out;
+    }
+    
+    .retro-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Retrospective: {{ retro.sprint.name }}</h1>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('meetings.retrospectives') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Retrospectives
+            </a>
+            {% if retro.meeting_link %}
+            <a href="{{ retro.meeting_link }}" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Join Meeting
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Retrospective details -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-lg leading-6 font-medium text-gray-900">Retrospective Details</h2>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ retro.date.strftime('%A, %B %d, %Y') }} at {{ retro.start_time.strftime('%I:%M %p') }}</p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                {% if retro.status == 'scheduled' %}
+                    bg-blue-100 text-blue-800
+                {% elif retro.status == 'in-progress' %}
+                    bg-yellow-100 text-yellow-800
+                {% else %}
+                    bg-green-100 text-green-800
+                {% endif %}
+            ">
+                {{ retro.status|capitalize }}
+            </span>
+        </div>
+        <div class="border-t border-gray-200">
+            <dl>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Sprint</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ retro.sprint.name }}
+                    </dd>
+                </div>
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Sprint Goal</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ retro.sprint.goal }}
+                    </dd>
+                </div>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Sprint Dates</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ retro.sprint.start_date.strftime('%b %d') }} - {{ retro.sprint.end_date.strftime('%b %d, %Y') }}
+                    </dd>
+                </div>
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Meeting Time</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ retro.start_time.strftime('%I:%M %p') }} ({{ retro.duration_minutes }} minutes)
+                    </dd>
+                </div>
+                {% if retro.meeting_link %}
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Meeting Link</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        <a href="{{ retro.meeting_link }}" target="_blank" class="text-indigo-600 hover:text-indigo-500">
+                            {{ retro.meeting_link }}
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </div>
+    </div>
+
+    <!-- Retrospective board -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">Retrospective Board</h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Reflect on what went well and what could be improved</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <!-- What went well -->
+                    <div>
+                        <div class="bg-green-50 p-4 rounded-lg mb-4">
+                            <h3 class="text-lg font-medium text-green-800 mb-2">What went well</h3>
+                            <p class="text-sm text-green-700">Celebrate achievements and positive aspects of the sprint</p>
+                            
+                            <form method="POST" action="{{ url_for('meetings.add_retro_item', retro_id=retro.id) }}" class="mt-4">
+                                <input type="hidden" name="category" value="went_well">
+                                <div class="flex">
+                                    <input type="text" name="content" required placeholder="Add something that went well..."
+                                        class="flex-1 shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                    <button type="submit" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                                        Add
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="retro-column space-y-3">
+                            {% for item in went_well_items %}
+                            <div class="retro-item bg-white p-4 rounded-lg border border-green-200 shadow-sm">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-gray-900">{{ item.content }}</p>
+                                        <div class="mt-2 flex items-center text-xs text-gray-500">
+                                            {% if item.user.profile_picture %}
+                                                <img class="h-5 w-5 rounded-full mr-1" src="{{ item.user.profile_picture }}" alt="{{ item.user.display_name }}">
+                                            {% else %}
+                                                <div class="h-5 w-5 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-medium mr-1">
+                                                    {{ item.user.display_name[:1] }}
+                                                </div>
+                                            {% endif %}
+                                            <span>{{ item.user.display_name }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0 flex items-center">
+                                        <form method="POST" action="{{ url_for('meetings.vote_retro_item', retro_id=retro.id, item_id=item.id) }}" class="inline-block">
+                                            <button type="submit" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
+                                                <svg class="h-5 w-5 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                                                </svg>
+                                                <span class="votes-count">{{ item.votes }}</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                                <p class="text-sm text-gray-500">No items added yet.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- What could be improved -->
+                    <div>
+                        <div class="bg-yellow-50 p-4 rounded-lg mb-4">
+                            <h3 class="text-lg font-medium text-yellow-800 mb-2">What could be improved</h3>
+                            <p class="text-sm text-yellow-700">Identify areas for improvement and growth</p>
+                            
+                            <form method="POST" action="{{ url_for('meetings.add_retro_item', retro_id=retro.id) }}" class="mt-4">
+                                <input type="hidden" name="category" value="to_improve">
+                                <div class="flex">
+                                    <input type="text" name="content" required placeholder="Add something to improve..."
+                                        class="flex-1 shadow-sm focus:ring-yellow-500 focus:border-yellow-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                    <button type="submit" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                        Add
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="retro-column space-y-3">
+                            {% for item in to_improve_items %}
+                            <div class="retro-item bg-white p-4 rounded-lg border border-yellow-200 shadow-sm">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <p class="text-sm text-gray-900">{{ item.content }}</p>
+                                        <div class="mt-2 flex items-center text-xs text-gray-500">
+                                            {% if item.user.profile_picture %}
+                                                <img class="h-5 w-5 rounded-full mr-1" src="{{ item.user.profile_picture }}" alt="{{ item.user.display_name }}">
+                                            {% else %}
+                                                <div class="h-5 w-5 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-medium mr-1">
+                                                    {{ item.user.display_name[:1] }}
+                                                </div>
+                                            {% endif %}
+                                            <span>{{ item.user.display_name }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4 flex-shrink-0 flex items-center">
+                                        <form method="POST" action="{{ url_for('meetings.vote_retro_item', retro_id=retro.id, item_id=item.id) }}" class="inline-block">
+                                            <button type="submit" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
+                                                <svg class="h-5 w-5 text-gray-400 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                                                </svg>
+                                                <span class="votes-count">{{ item.votes }}</span>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                                <p class="text-sm text-gray-500">No items added yet.</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action items -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-lg leading-6 font-medium text-gray-900">Action Items</h2>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Tasks to address the improvement areas</p>
+            </div>
+            <button type="button" onclick="document.getElementById('add-action-modal').classList.remove('hidden')" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Add Action Item
+            </button>
+        </div>
+        <div class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                {% if action_items %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Description
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Assignee
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Due Date
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for item in action_items %}
+                            <tr>
+                                <td class="px-6 py-4 text-sm text-gray-900">
+                                    {{ item.description }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if item.assignee %}
+                                    <div class="flex items-center">
+                                        {% if item.assignee.profile_picture %}
+                                            <img class="h-6 w-6 rounded-full mr-2" src="{{ item.assignee.profile_picture }}" alt="{{ item.assignee.display_name }}">
+                                        {% else %}
+                                            <div class="h-6 w-6 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-medium mr-2">
+                                                {{ item.assignee.display_name[:1] }}
+                                            </div>
+                                        {% endif %}
+                                        <span class="text-sm text-gray-900">{{ item.assignee.display_name }}</span>
+                                    </div>
+                                    {% else %}
+                                    <span class="text-sm text-gray-500">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {% if item.due_date %}
+                                    {{ item.due_date.strftime('%b %d, %Y') }}
+                                    {% else %}
+                                    No due date
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if item.status == 'open' %}
+                                            bg-red-100 text-red-800
+                                        {% elif item.status == 'in-progress' %}
+                                            bg-yellow-100 text-yellow-800
+                                        {% else %}
+                                            bg-green-100 text-green-800
+                                        {% endif %}
+                                    ">
+                                        {{ item.status|replace('-', ' ')|capitalize }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <form method="POST" action="{{ url_for('meetings.update_action_item', item_id=item.id) }}" class="inline-block">
+                                        <select name="status" onchange="this.form.submit()" class="text-sm border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                            <option value="open" {% if item.status == 'open' %}selected{% endif %}>Open</option>
+                                            <option value="in-progress" {% if item.status == 'in-progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="completed" {% if item.status == 'completed' %}selected{% endif %}>Completed</option>
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500">No action items created yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Action Item Modal -->
+<div id="add-action-modal" class="fixed z-10 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+        
+        <!-- Modal panel -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <form method="POST" action="{{ url_for('meetings.add_retro_action', retro_id=retro.id) }}">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Add Action Item
+                            </h3>
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <div class="mt-1">
+                                        <textarea id="description" name="description" rows="3" required class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label for="assignee_id" class="block text-sm font-medium text-gray-700">Assignee</label>
+                                    <div class="mt-1">
+                                        <select id="assignee_id" name="assignee_id" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                            <option value="">-- Unassigned --</option>
+                                            {% for user in users %}
+                                            <option value="{{ user.id }}">{{ user.display_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
+                                    <div class="mt-1">
+                                        <input type="date" id="due_date" name="due_date" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Add Action Item
+                    </button>
+                    <button type="button" onclick="document.getElementById('add-action-modal').classList.add('hidden')" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default due date to 7 days from now
+        const defaultDueDate = new Date();
+        defaultDueDate.setDate(defaultDueDate.getDate() + 7);
+        const formattedDate = defaultDueDate.toISOString().split('T')[0];
+        document.getElementById('due_date').value = formattedDate;
+        
+        // Handle AJAX voting
+        const voteButtons = document.querySelectorAll('form[action*="vote_retro_item"]');
+        voteButtons.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const button = form.querySelector('button');
+                const votesCount = button.querySelector('.votes-count');
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        votesCount.textContent = data.votes;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

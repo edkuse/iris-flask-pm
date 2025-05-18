@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Standups - MVNx Iris{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Daily Standups</h1>
+        <a href="{{ url_for('meetings.new_standup') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Schedule Standup
+        </a>
+    </div>
+
+    <!-- Today's standup -->
+    {% if today_standup %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+            <div>
+                <h2 class="text-lg leading-6 font-medium text-gray-900">Today's Standup</h2>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ today_standup.date.strftime('%A, %B %d, %Y') }}</p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                {% if today_standup.status == 'scheduled' %}
+                    bg-blue-100 text-blue-800
+                {% elif today_standup.status == 'in-progress' %}
+                    bg-yellow-100 text-yellow-800
+                {% else %}
+                    bg-green-100 text-green-800
+                {% endif %}
+            ">
+                {{ today_standup.status|capitalize }}
+            </span>
+        </div>
+        <div class="border-t border-gray-200">
+            <dl>
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Time</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ today_standup.start_time.strftime('%I:%M %p') }} ({{ today_standup.duration_minutes }} minutes)
+                    </dd>
+                </div>
+                {% if today_standup.sprint %}
+                <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Sprint</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        {{ today_standup.sprint.name }}
+                    </dd>
+                </div>
+                {% endif %}
+                {% if today_standup.meeting_link %}
+                <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                    <dt class="text-sm font-medium text-gray-500">Meeting Link</dt>
+                    <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                        <a href="{{ today_standup.meeting_link }}" target="_blank" class="text-indigo-600 hover:text-indigo-500">
+                            {{ today_standup.meeting_link }}
+                        </a>
+                    </dd>
+                </div>
+                {% endif %}
+                <div class="bg-white px-4 py-5 sm:px-6">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Your Update</h3>
+                        {% if has_submitted %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            Submitted
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Not Submitted
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="mt-4">
+                        {% if has_submitted %}
+                        <a href="{{ url_for('meetings.submit_standup', standup_id=today_standup.id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Edit Your Update
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('meetings.submit_standup', standup_id=today_standup.id) }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Submit Your Update
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('meetings.view_standup', standup_id=today_standup.id) }}" class="ml-3 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            View All Updates
+                        </a>
+                    </div>
+                </div>
+            </dl>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- All standups -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">All Standups</h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">History of all standup meetings</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Sprint
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for standup in standups %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ standup.date.strftime('%a, %b %d, %Y') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ standup.start_time.strftime('%I:%M %p') }} ({{ standup.duration_minutes }} min)
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {% if standup.sprint %}
+                                    {{ standup.sprint.name }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if standup.status == 'scheduled' %}
+                                            bg-blue-100 text-blue-800
+                                        {% elif standup.status == 'in-progress' %}
+                                            bg-yellow-100 text-yellow-800
+                                        {% else %}
+                                            bg-green-100 text-green-800
+                                        {% endif %}
+                                    ">
+                                        {{ standup.status|capitalize }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{{ url_for('meetings.view_standup', standup_id=standup.id) }}" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                    {% if today_standup and standup.date == today_standup.date %}
+                                    <a href="{{ url_for('meetings.submit_standup', standup_id=standup.id) }}" class="ml-3 text-indigo-600 hover:text-indigo-900">Update</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    No standups scheduled yet.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

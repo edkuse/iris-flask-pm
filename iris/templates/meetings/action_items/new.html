@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}New Action Item - MVNx Iris{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">New Action Item</h1>
+        <a href="{{ url_for('meetings.action_items') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Action Items
+        </a>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">Action Item Details</h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Create a new action item to track</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <form method="POST" action="{{ url_for('meetings.new_action_item') }}" class="space-y-6 sm:space-y-5">
+                <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5 px-4 py-5 sm:px-6">
+                    <label for="description" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Description
+                    </label>
+                    <div class="mt-1 sm:mt-0 sm:col-span-2">
+                        <textarea id="description" name="description" rows="3" required
+                            class="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"></textarea>
+                    </div>
+                </div>
+
+                <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5 px-4 py-5 sm:px-6 border-t border-gray-200">
+                    <label for="assignee_id" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Assignee
+                    </label>
+                    <div class="mt-1 sm:mt-0 sm:col-span-2">
+                        <select id="assignee_id" name="assignee_id"
+                            class="max-w-lg block focus:ring-indigo-500 focus:border-indigo-500 w-full shadow-sm sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                            <option value="">-- Unassigned --</option>
+                            {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.display_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5 px-4 py-5 sm:px-6 border-t border-gray-200">
+                    <label for="due_date" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Due Date
+                    </label>
+                    <div class="mt-1 sm:mt-0 sm:col-span-2">
+                        <input type="date" name="due_date" id="due_date"
+                            class="max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                </div>
+
+                <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t border-gray-200">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Create Action Item
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set default due date to 7 days from now
+        const defaultDueDate = new Date();
+        defaultDueDate.setDate(defaultDueDate.getDate() + 7);
+        const formattedDate = defaultDueDate.toISOString().split('T')[0];
+        document.getElementById('due_date').value = formattedDate;
+    });
+</script>
+{% endblock %}

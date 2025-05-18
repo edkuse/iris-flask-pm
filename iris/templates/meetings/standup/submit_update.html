@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Standup Update - MVNx Iris{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">
+            {% if existing_note %}
+            Edit Standup Update
+            {% else %}
+            Submit Standup Update
+            {% endif %}
+        </h1>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('meetings.view_standup', standup_id=standup.id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Standup
+            </a>
+            {% if standup.meeting_link %}
+            <a href="{{ standup.meeting_link }}" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                </svg>
+                Join Meeting
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">Standup: {{ standup.date.strftime('%A, %B %d, %Y') }}</h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">{{ standup.start_time.strftime('%I:%M %p') }} ({{ standup.duration_minutes }} minutes)</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <form method="POST" action="{{ url_for('meetings.submit_standup', standup_id=standup.id) }}" class="space-y-6">
+                <div class="px-4 py-5 sm:px-6">
+                    <div class="space-y-6">
+                        <div>
+                            <label for="yesterday" class="block text-sm font-medium text-gray-700">
+                                What did you do yesterday?
+                            </label>
+                            <div class="mt-1">
+                                <textarea id="yesterday" name="yesterday" rows="3" required class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ existing_note.yesterday if existing_note else '' }}</textarea>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">
+                                Briefly describe what you accomplished yesterday.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label for="today" class="block text-sm font-medium text-gray-700">
+                                What will you do today?
+                            </label>
+                            <div class="mt-1">
+                                <textarea id="today" name="today" rows="3" required class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ existing_note.today if existing_note else '' }}</textarea>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">
+                                Describe what you plan to work on today.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <label for="blockers" class="block text-sm font-medium text-gray-700">
+                                Any blockers or impediments?
+                            </label>
+                            <div class="mt-1">
+                                <textarea id="blockers" name="blockers" rows="3" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ existing_note.blockers if existing_note else '' }}</textarea>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">
+                                List any issues that are preventing you from making progress.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="px-4 py-3 bg-gray-50 text-right sm:px-6 border-t border-gray-200">
+                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        {% if existing_note %}
+                        Update
+                        {% else %}
+                        Submit
+                        {% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

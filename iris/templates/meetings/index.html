@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block title %}Meetings - MVNx Iris{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Meetings</h1>
+        <div class="flex space-x-2">
+            <a href="{{ url_for('meetings.calendar') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Calendar View
+            </a>
+            <div class="relative" x-data="{ open: false }">
+                <button @click="open = !open" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    New Meeting
+                </button>
+                <div x-show="open" @click.away="open = false" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+                    <div class="py-1" role="none">
+                        <a href="{{ url_for('meetings.new_standup') }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Daily Standup</a>
+                        <a href="{{ url_for('meetings.new_retrospective') }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Sprint Retrospective</a>
+                        <a href="{{ url_for('meetings.new_action_item') }}" class="text-gray-700 block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Action Item</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meeting sections -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <!-- Upcoming meetings -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg leading-6 font-medium text-gray-900">Upcoming Meetings</h2>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Scheduled meetings for the next few days</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('meetings.standups') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View all standups</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-200">
+                <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                    <h3 class="text-md font-medium text-gray-900 mb-3">Daily Standups</h3>
+                    <ul class="divide-y divide-gray-200">
+                        {% for standup in upcoming_standups %}
+                        <li class="py-3">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
+                                        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        Daily Standup - {{ standup.date.strftime('%a, %b %d') }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {{ standup.start_time.strftime('%I:%M %p') }} ({{ standup.duration_minutes }} min)
+                                        {% if standup.sprint %}
+                                        - {{ standup.sprint.name }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('meetings.view_standup', standup_id=standup.id) }}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="py-3">
+                            <p class="text-sm text-gray-500">No upcoming standups scheduled.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200">
+                <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-md font-medium text-gray-900">Retrospectives</h3>
+                        <a href="{{ url_for('meetings.retrospectives') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View all</a>
+                    </div>
+                    <ul class="divide-y divide-gray-200">
+                        {% for retro in upcoming_retros %}
+                        <li class="py-3">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-purple-100">
+                                        <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        Sprint Retrospective - {{ retro.sprint.name }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {{ retro.date.strftime('%a, %b %d') }} at {{ retro.start_time.strftime('%I:%M %p') }} ({{ retro.duration_minutes }} min)
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('meetings.view_retrospective', retro_id=retro.id) }}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="py-3">
+                            <p class="text-sm text-gray-500">No upcoming retrospectives scheduled.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- My action items -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg leading-6 font-medium text-gray-900">My Action Items</h2>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Tasks assigned to you from meetings</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('meetings.action_items') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">View all action items</a>
+                </div>
+            </div>
+            <div class="border-t border-gray-200">
+                <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                    <ul class="divide-y divide-gray-200">
+                        {% for item in my_action_items %}
+                        <li class="py-3">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    {% if item.status == 'open' %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-100">
+                                        <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </span>
+                                    {% elif item.status == 'in-progress' %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-yellow-100">
+                                        <svg class="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
+                                        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {{ item.description }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {% if item.due_date %}
+                                        Due: {{ item.due_date.strftime('%b %d, %Y') }}
+                                        {% else %}
+                                        No due date
+                                        {% endif %}
+                                        {% if item.standup_meeting %}
+                                        - From standup on {{ item.standup_meeting.date.strftime('%b %d') }}
+                                        {% elif item.retro_meeting %}
+                                        - From retrospective for {{ item.retro_meeting.sprint.name }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    <form method="POST" action="{{ url_for('meetings.update_action_item', item_id=item.id) }}">
+                                        <select name="status" onchange="this.form.submit()" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                            <option value="open" {% if item.status == 'open' %}selected{% endif %}>Open</option>
+                                            <option value="in-progress" {% if item.status == 'in-progress' %}selected{% endif %}>In Progress</option>
+                                            <option value="completed" {% if item.status == 'completed' %}selected{% endif %}>Completed</option>
+                                        </select>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="py-3">
+                            <p class="text-sm text-gray-500">No action items assigned to you.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent meetings -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-lg leading-6 font-medium text-gray-900">Recent Meetings</h2>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Past meetings and their outcomes</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <!-- Recent standups -->
+                    <div>
+                        <h3 class="text-md font-medium text-gray-900 mb-3">Daily Standups</h3>
+                        <ul class="divide-y divide-gray-200">
+                            {% for standup in recent_standups %}
+                            <li class="py-3">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
+                                            <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            Daily Standup - {{ standup.date.strftime('%a, %b %d') }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 truncate">
+                                            {{ standup.start_time.strftime('%I:%M %p') }}
+                                            {% if standup.sprint %}
+                                            - {{ standup.sprint.name }}
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('meetings.view_standup', standup_id=standup.id) }}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            {% else %}
+                            <li class="py-3">
+                                <p class="text-sm text-gray-500">No recent standups.</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Recent retrospectives -->
+                    <div>
+                        <h3 class="text-md font-medium text-gray-900 mb-3">Retrospectives</h3>
+                        <ul class="divide-y divide-gray-200">
+                            {% for retro in recent_retros %}
+                            <li class="py-3">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-purple-100">
+                                            <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                            </svg>
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            Sprint Retrospective - {{ retro.sprint.name }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 truncate">
+                                            {{ retro.date.strftime('%a, %b %d') }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="{{ url_for('meetings.view_retrospective', retro_id=retro.id) }}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            {% else %}
+                            <li class="py-3">
+                                <p class="text-sm text-gray-500">No recent retrospectives.</p>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -184,6 +184,147 @@
     </div>
     {% endif %}
 
+    <!-- Upcoming Meetings Section -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Upcoming Meetings</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Your scheduled standups and retrospectives</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                {% if upcoming_meetings %}
+                <div class="flow-root">
+                    <ul role="list" class="-my-5 divide-y divide-gray-200">
+                        {% for meeting in upcoming_meetings %}
+                        <li class="py-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    {% if meeting.type == 'standup' %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100">
+                                        <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-purple-100">
+                                        <svg class="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                        </svg>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {% if meeting.type == 'standup' %}
+                                        Daily Standup
+                                        {% else %}
+                                        Sprint Retrospective
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {{ meeting.date.strftime('%b %d, %Y') }} at {{ meeting.start_time.strftime('%I:%M %p') }}
+                                    </p>
+                                </div>
+                                <div>
+                                    {% if meeting.type == 'standup' %}
+                                    <a href="{{ url_for('meetings.view_standup', meeting_id=meeting.id) }}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                        View
+                                    </a>
+                                    {% else %}
+                                    <a href="{{ url_for('meetings.view_retrospective', meeting_id=meeting.id) }}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                        View
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500">No upcoming meetings scheduled.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-200">
+            <div class="flex justify-between">
+                <div class="text-sm">
+                    <a href="{{ url_for('meetings.index') }}" class="font-medium text-blue-600 hover:text-blue-500">View all meetings</a>
+                </div>
+                <div class="text-sm">
+                    <a href="{{ url_for('meetings.calendar') }}" class="font-medium text-blue-600 hover:text-blue-500">View calendar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Items Section -->
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">My Action Items</h3>
+            <p class="mt-1 max-w-2xl text-sm text-gray-500">Tasks assigned to you from meetings</p>
+        </div>
+        <div class="border-t border-gray-200">
+            <div class="bg-gray-50 px-4 py-5 sm:p-6">
+                {% if my_action_items %}
+                <div class="flow-root">
+                    <ul role="list" class="-my-5 divide-y divide-gray-200">
+                        {% for item in my_action_items %}
+                        <li class="py-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    {% if item.status == 'open' %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-100">
+                                        <svg class="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </span>
+                                    {% elif item.status == 'in-progress' %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-yellow-100">
+                                        <svg class="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center justify-center h-8 w-8 rounded-full bg-green-100">
+                                        <svg class="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">{{ item.description }}</p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        {% if item.due_date %}
+                                        Due: {{ item.due_date.strftime('%b %d, %Y') }}
+                                        {% else %}
+                                        No due date
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="{{ url_for('meetings.view_action_item', item_id=item.id) }}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <p class="text-sm text-gray-500">No action items assigned to you.</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="bg-gray-50 px-4 py-4 sm:px-6 border-t border-gray-200">
+            <div class="text-sm">
+                <a href="{{ url_for('meetings.action_items') }}" class="font-medium text-blue-600 hover:text-blue-500">View all action items</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Task status and recent epics -->
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <!-- Task status -->
@@ -317,11 +458,11 @@
                     </svg>
                     New Task
                 </a>
-                <a href="{{ url_for('sprints.new') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <a href="{{ url_for('meetings.new_standup') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                     <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
-                    New Sprint
+                    New Standup
                 </a>
             </div>
         </div>

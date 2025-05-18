@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Sprint{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="flex items-center mb-6">
+            <a href="{{ url_for('sprints.view', sprint_id=sprint.id) }}" class="text-blue-600 hover:text-blue-800 mr-4">
+                <i class="fas fa-arrow-left"></i> Back to Sprint
+            </a>
+            <h1 class="text-3xl font-bold text-gray-800">Edit Sprint</h1>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <form method="POST" action="{{ url_for('sprints.edit', sprint_id=sprint.id) }}">
+                <div class="mb-4">
+                    <label for="name" class="block text-gray-700 font-medium mb-2">Sprint Name</label>
+                    <input type="text" id="name" name="name" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                           value="{{ sprint.name }}">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="goal" class="block text-gray-700 font-medium mb-2">Sprint Goal</label>
+                    <textarea id="goal" name="goal" rows="3"
+                              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">{{ sprint.goal }}</textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="start_date" class="block text-gray-700 font-medium mb-2">Start Date</label>
+                        <input type="date" id="start_date" name="start_date" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               value="{{ sprint.start_date.strftime('%Y-%m-%d') }}">
+                    </div>
+                    
+                    <div>
+                        <label for="end_date" class="block text-gray-700 font-medium mb-2">End Date</label>
+                        <input type="date" id="end_date" name="end_date" required
+                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               value="{{ sprint.end_date.strftime('%Y-%m-%d') }}">
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="status" class="block text-gray-700 font-medium mb-2">Status</label>
+                    <select id="status" name="status"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="planning" {% if sprint.status == 'planning' %}selected{% endif %}>Planning</option>
+                        <option value="active" {% if sprint.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="completed" {% if sprint.status == 'completed' %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                
+                <div class="flex justify-between">
+                    <form method="POST" action="{{ url_for('sprints.delete', sprint_id=sprint.id) }}" class="inline" onsubmit="return confirm('Are you sure you want to delete this sprint? This action cannot be undone.')">
+                        <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded shadow">
+                            Delete Sprint
+                        </button>
+                    </form>
+                    
+                    <div>
+                        <a href="{{ url_for('sprints.view', sprint_id=sprint.id) }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded shadow mr-2">
+                            Cancel
+                        </a>
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ sprint.name }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex items-center mb-6">
+        <a href="{{ url_for('sprints.index') }}" class="text-blue-600 hover:text-blue-800 mr-4">
+            <i class="fas fa-arrow-left"></i> Back to Sprints
+        </a>
+        <h1 class="text-3xl font-bold text-gray-800">{{ sprint.name }}</h1>
+        
+        <div class="ml-auto flex space-x-2">
+            {% if sprint.status == 'planning' %}
+            <form method="POST" action="{{ url_for('sprints.start_sprint', sprint_id=sprint.id) }}" class="inline">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow">
+                    Start Sprint
+                </button>
+            </form>
+            {% elif sprint.status == 'active' %}
+            <form method="POST" action="{{ url_for('sprints.complete_sprint', sprint_id=sprint.id) }}" class="inline">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
+                    Complete Sprint
+                </button>
+            </form>
+            {% endif %}
+            
+            <a href="{{ url_for('sprints.planning', sprint_id=sprint.id) }}" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded shadow">
+                Sprint Planning
+            </a>
+            
+            <a href="{{ url_for('sprints.edit', sprint_id=sprint.id) }}" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded shadow">
+                Edit
+            </a>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow-md p-6 lg:col-span-2">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800">Sprint Details</h2>
+                    <p class="text-gray-600 mt-1">{{ sprint.goal }}</p>
+                </div>
+                <span class="px-3 py-1 rounded-full text-sm font-medium
+                    {% if sprint.status == 'planning' %}bg-yellow-100 text-yellow-800
+                    {% elif sprint.status == 'active' %}bg-green-100 text-green-800
+                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ sprint.status }}
+                </span>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">Start Date</div>
+                    <div class="font-medium">{{ sprint.start_date.strftime('%b %d, %Y') }}</div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">End Date</div>
+                    <div class="font-medium">{{ sprint.end_date.strftime('%b %d, %Y') }}</div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">Duration</div>
+                    <div class="font-medium">{{ sprint.days_total }} days</div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">Days Remaining</div>
+                    <div class="font-medium">{{ sprint.days_remaining }} days</div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <div class="flex justify-between text-sm text-gray-600 mb-1">
+                    <span>Progress</span>
+                    <span>{{ sprint.progress_percentage }}%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div class="bg-green-600 h-2.5 rounded-full" style="width: {{ sprint.progress_percentage }}%"></div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">User Stories</div>
+                    <div class="font-medium">{{ sprint.user_stories|length }}</div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">Story Points</div>
+                    <div class="font-medium">{{ sprint.total_story_points }}</div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">Completed</div>
+                    <div class="font-medium">{{ sprint.completed_story_points }}</div>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded">
+                    <div class="text-sm text-gray-600">Remaining</div>
+                    <div class="font-medium">{{ sprint.total_story_points - sprint.completed_story_points }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Burndown Chart</h2>
+            <canvas id="burndownChart" width="400" height="300"></canvas>
+            <div class="mt-4 text-center">
+                <a href="{{ url_for('sprints.burndown', sprint_id=sprint.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                    View Full Burndown Chart
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Sprint Backlog</h2>
+            <a href="{{ url_for('sprints.planning', sprint_id=sprint.id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                Manage Sprint Backlog
+            </a>
+        </div>
+        
+        {% if not sprint.user_stories %}
+        <div class="text-center py-8">
+            <p class="text-gray-600 mb-4">No user stories in this sprint yet.</p>
+            <a href="{{ url_for('sprints.planning', sprint_id=sprint.id) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
+                Add User Stories
+            </a>
+        </div>
+        {% else %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
+                    <span class="w-3 h-3 bg-gray-400 rounded-full mr-2"></span>
+                    Backlog
+                    <span class="ml-2 text-sm text-gray-500">({{ backlog_stories|length }})</span>
+                </h3>
+                
+                {% for story in backlog_stories %}
+                <div class="bg-white border border-gray-200 rounded-md p-4 mb-3 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-medium text-gray-800">
+                            <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="hover:text-blue-600">
+                                {{ story.title }}
+                            </a>
+                        </h4>
+                        {% if story.story_points %}
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            {{ story.story_points }} pts
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-gray-600 text-sm mt-2">As a {{ story.role }}, I want to {{ story.goal }} so that {{ story.benefit }}</p>
+                    
+                    <div class="mt-3 flex justify-between items-center text-sm">
+                        <div>
+                            <span class="text-gray-500">Tasks:</span>
+                            <span class="font-medium">{{ story.tasks|length }}</span>
+                        </div>
+                        <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="text-blue-600 hover:text-blue-800">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not backlog_stories %}
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-4 text-center text-gray-500">
+                    No stories in backlog
+                </div>
+                {% endif %}
+            </div>
+            
+            <div>
+                <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
+                    <span class="w-3 h-3 bg-blue-400 rounded-full mr-2"></span>
+                    In Progress
+                    <span class="ml-2 text-sm text-gray-500">({{ in_progress_stories|length }})</span>
+                </h3>
+                
+                {% for story in in_progress_stories %}
+                <div class="bg-white border border-gray-200 rounded-md p-4 mb-3 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-medium text-gray-800">
+                            <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="hover:text-blue-600">
+                                {{ story.title }}
+                            </a>
+                        </h4>
+                        {% if story.story_points %}
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            {{ story.story_points }} pts
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-gray-600 text-sm mt-2">As a {{ story.role }}, I want to {{ story.goal }} so that {{ story.benefit }}</p>
+                    
+                    <div class="mt-3 flex justify-between items-center text-sm">
+                        <div>
+                            <span class="text-gray-500">Tasks:</span>
+                            <span class="font-medium">{{ story.tasks|length }}</span>
+                        </div>
+                        <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="text-blue-600 hover:text-blue-800">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not in_progress_stories %}
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-4 text-center text-gray-500">
+                    No stories in progress
+                </div>
+                {% endif %}
+            </div>
+            
+            <div>
+                <h3 class="text-lg font-medium text-gray-700 mb-3 flex items-center">
+                    <span class="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+                    Done
+                    <span class="ml-2 text-sm text-gray-500">({{ done_stories|length }})</span>
+                </h3>
+                
+                {% for story in done_stories %}
+                <div class="bg-white border border-gray-200 rounded-md p-4 mb-3 shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <h4 class="font-medium text-gray-800">
+                            <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="hover:text-blue-600">
+                                {{ story.title }}
+                            </a>
+                        </h4>
+                        {% if story.story_points %}
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            {{ story.story_points }} pts
+                        </span>
+                        {% endif %}
+                    </div>
+                    <p class="text-gray-600 text-sm mt-2">As a {{ story.role }}, I want to {{ story.goal }} so that {{ story.benefit }}</p>
+                    
+                    <div class="mt-3 flex justify-between items-center text-sm">
+                        <div>
+                            <span class="text-gray-500">Tasks:</span>
+                            <span class="font-medium">{{ story.tasks|length }}</span>
+                        </div>
+                        <a href="{{ url_for('user_stories.view', story_id=story.id) }}" class="text-blue-600 hover:text-blue-800">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                {% if not done_stories %}
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-4 text-center text-gray-500">
+                    No completed stories
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const burndownData = '{{ burndown_data|safe }}';
+    
+    if (burndownData && burndownData.dates && burndownData.dates.length > 0) {
+        const ctx = document.getElementById('burndownChart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: burndownData.dates,
+                datasets: [
+                    {
+                        label: 'Ideal Burndown',
+                        data: burndownData.ideal.map(item => item.points),
+                        borderColor: 'rgba(156, 163, 175, 0.8)',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0
+                    },
+                    {
+                        label: 'Actual Burndown',
+                        data: burndownData.actual.map(item => item.points),
+                        borderColor: 'rgba(59, 130, 246, 0.8)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        fill: true,
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Story Points Remaining'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

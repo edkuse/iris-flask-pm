@@ -19,6 +19,7 @@ class Config:
     SCOPE = ["User.Read"]  # Default scope for authentication
     SESSION_TYPE = "filesystem"  # Session storage type
     SESSION_FILE_DIR = "./iris/sessions"
+    WTF_CSRF_SECRET_KEY = 'your-csrf-secret-key'
     
     # App configuration
     APP_URL = os.environ.get('APP_URL')

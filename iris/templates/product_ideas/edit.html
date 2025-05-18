@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Product Idea - MVNx Iris{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-gray-900">Edit Product Idea</h1>
+        <a href="{{ url_for('product_ideas.view', idea_id=product_idea.id) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Cancel
+        </a>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <form method="POST" action="{{ url_for('product_ideas.edit', idea_id=product_idea.id) }}">
+                <div class="space-y-6">
+                    <!-- Title -->
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                        <div class="mt-1">
+                            <input type="text" name="title" id="title" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" value="{{ product_idea.title }}" required>
+                        </div>
+                    </div>
+
+                    <!-- Impact Level -->
+                    <div>
+                        <label for="impact_level" class="block text-sm font-medium text-gray-700">Impact Level</label>
+                        <div class="mt-1">
+                            <select id="impact_level" name="impact_level" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                <option value="Low" {% if product_idea.impact_level == 'Low' %}selected{% endif %}>Low</option>
+                                <option value="Medium" {% if product_idea.impact_level == 'Medium' %}selected{% endif %}>Medium</option>
+                                <option value="High" {% if product_idea.impact_level == 'High' %}selected{% endif %}>High</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div>
+                        <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
+                        <div class="mt-1">
+                            <input type="text" name="tags" id="tags" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" value="{{ product_idea.tags|join(',') if product_idea.tags else '' }}" placeholder="Comma-separated tags">
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Separate tags with commas (e.g., "mobile,web,api")</p>
+                    </div>
+
+                    <!-- Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <div class="mt-1">
+                            <textarea id="description" name="description" rows="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ product_idea.description }}</textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Brief description of the product idea</p>
+                    </div>
+
+                    <!-- Problem Statement -->
+                    <div>
+                        <label for="problem_statement" class="block text-sm font-medium text-gray-700">Problem Statement</label>
+                        <div class="mt-1">
+                            <textarea id="problem_statement" name="problem_statement" rows="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ product_idea.problem_statement }}</textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">What problem does this idea solve?</p>
+                    </div>
+
+                    <!-- Success Metrics -->
+                    <div>
+                        <label for="success_metrics" class="block text-sm font-medium text-gray-700">Success Metrics</label>
+                        <div class="mt-1">
+                            <textarea id="success_metrics" name="success_metrics" rows="5" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ product_idea.success_metrics }}</textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">How will we measure the success of this idea?</p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg class="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // You could add client-side validation or other enhancements here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Example: Auto-resize textareas as content grows
+        const textareas = document.querySelectorAll('textarea');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            // Trigger once on load
+            textarea.dispatchEvent(new Event('input'));
+        });
+    });
+</script>
+{% endblock %}

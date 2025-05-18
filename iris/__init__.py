@@ -20,7 +20,7 @@ def create_app(config_class=Config):
     from .blueprints.dashboard import bp as dashboard_bp
     from .blueprints.epics import bp as epics_bp
     from .blueprints.meetings import bp as meetings_bp
-    from .blueprints.product_ideas import product_ideas_bp
+    from .blueprints.product_ideas import bp as product_ideas_bp
     from .blueprints.user_stories import user_stories_bp
     from .blueprints.tasks import bp as tasks_bp
     from .blueprints.kanban import kanban_bp
@@ -32,7 +32,7 @@ def create_app(config_class=Config):
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(epics_bp)
     app.register_blueprint(meetings_bp)
-    app.register_blueprint(product_ideas_bp, url_prefix='/product-ideas')
+    app.register_blueprint(product_ideas_bp)
     app.register_blueprint(user_stories_bp, url_prefix='/user-stories')
     app.register_blueprint(tasks_bp, url_prefix='/tasks')
     app.register_blueprint(kanban_bp, url_prefix='/kanban')

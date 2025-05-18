@@ -14,15 +14,18 @@
         </p>
         <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
             <div class="rounded-md shadow">
-                <a href="{{ url_for('auth.login') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
-                    Sign in
+                <a href="{{ url_for('auth.login') }}" class="w-full flex items-center justify-center">
+                    <img src="{{url_for('static',filename='images/ms-symbollockup_signin_light.png')}}" alt="Sign in with Microsoft">
                 </a>
             </div>
+            
+            {#
             <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
                 <a href="{{ url_for('auth.test_login') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10">
                     Test Login
                 </a>
             </div>
+            #}
         </div>
     </div>
     

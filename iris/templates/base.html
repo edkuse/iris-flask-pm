@@ -116,6 +116,7 @@
                     
                     <!-- Search bar -->
                     <div class="flex-1 px-4 flex justify-center lg:justify-end">
+                        {#
                         <div class="max-w-lg w-full lg:max-w-xs">
                             <label for="search" class="sr-only">Search</label>
                             <div class="relative">
@@ -127,6 +128,7 @@
                                 <input id="search" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 sm:text-sm" placeholder="Search" type="search">
                             </div>
                         </div>
+                        #}
                     </div>
                     
                     <!-- User dropdown -->
@@ -138,11 +140,11 @@
                                 <button @click="open = !open" class="max-w-xs flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu" aria-haspopup="true">
                                     <span class="sr-only">Open user menu</span>
                                     {% if current_user.profile_picture %}
-                                    <img class="h-8 w-8 rounded-full" src="{{ current_user.profile_picture }}" alt="{{ current_user.display_name }}">
+                                        <img class="h-8 w-8 rounded-full" src="{{ current_user.profile_picture }}" alt="{{ current_user.display_name }}">
                                     {% else %}
-                                    <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
-                                        {{ current_user.display_name[:1] }}
-                                    </div>
+                                        <div class="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-medium">
+                                            {{ current_user.display_name[:1] }}
+                                        </div>
                                     {% endif %}
                                     <span class="ml-2 text-gray-700">{{ current_user.display_name }}</span>
                                 </button>
@@ -227,14 +229,17 @@
                         </div>
                         {% else %}
                         <div class="flex space-x-2">
-                            <a href="{{ url_for('auth.login') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Sign in
+                            <a href="{{ url_for('auth.login') }}" class="inline-flex items-center">
+                                <img src="{{url_for('static',filename='images/ms-symbollockup_signin_dark.png')}}" alt="Sign in with Microsoft">
                             </a>
+
+                            {#
                             {% if config.get('FLASK_ENV') == 'development' %}
                             <a href="{{ url_for('auth.dev_login') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 Dev Login
                             </a>
                             {% endif %}
+                            #}
                         </div>
                         {% endif %}
                     </div>

@@ -2,13 +2,15 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from iris.extensions import db
 from iris.models import ProductIdea
-from iris.utils import flash_success
+from iris.utils.flash import flash_success
+from iris.utils.rbac import permission_required
 
 bp = Blueprint('product_ideas', __name__, url_prefix='/product-ideas')
 
 
 @bp.route('/')
 @login_required
+@permission_required('product_idea', 'read')
 def index():
     ideas = ProductIdea.query.order_by(ProductIdea.created_at.desc()).all()
     return render_template('product_ideas/index.html', ideas=ideas)
@@ -16,6 +18,7 @@ def index():
 
 @bp.route('/new', methods=['GET', 'POST'])
 @login_required
+@permission_required('product_idea', 'create')
 def new():
     if request.method == 'POST':
         title = request.form.get('title')
@@ -53,6 +56,7 @@ def view(idea_id):
 
 @bp.route('/<int:idea_id>/edit', methods=['GET', 'POST'])
 @login_required
+@permission_required('product_idea', 'update')
 def edit(idea_id):
     idea = ProductIdea.query.get_or_404(idea_id)
     
@@ -83,6 +87,7 @@ def edit(idea_id):
 
 @bp.route('/<int:idea_id>/delete', methods=['POST'])
 @login_required
+@permission_required('product_idea', 'delete')
 def delete(idea_id):
     idea = ProductIdea.query.get_or_404(idea_id)
     

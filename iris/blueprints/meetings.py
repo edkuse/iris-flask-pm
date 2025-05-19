@@ -5,7 +5,7 @@ from iris.models import (
     StandupMeeting, StandupNote, RetrospectiveMeeting, RetrospectiveItem, 
     ActionItem, User, Sprint, RetrospectiveCategory
 )
-from iris.utils import flash_error, flash_success
+from iris.utils.flash import flash_error, flash_success
 from datetime import datetime, date, timedelta
 from sqlalchemy import desc
 

@@ -1,7 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for
 from iris.extensions import db
 from iris.models import Epic, ProductIdea, StatusEnum
-from iris.utils import flash_success
+from iris.utils.flash import flash_success
 
 bp = Blueprint('epics', __name__, url_prefix='/epics')
 

@@ -1,8 +1,8 @@
-from flask import Blueprint, flash, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required
 from iris.extensions import db
 from iris.models import Sprint, UserStory, SprintStatusEnum, StatusEnum
-from iris.utils import flash_error, flash_success
+from iris.utils.flash import flash_error, flash_success
 from datetime import datetime, timedelta
 import json
 

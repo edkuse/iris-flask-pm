@@ -1,13 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from iris.extensions import db
 from iris.models import UserStory, Epic, Comment, StatusEnum
-from iris.utils import flash_success, flash_error
+from iris.utils.flash import flash_success, flash_error
 
-user_stories_bp = Blueprint('user_stories', __name__)
+bp = Blueprint('user_stories', __name__, url_prefix='/user-stories')
 
 
-@user_stories_bp.route('/')
+@bp.route('/')
 @login_required
 def index():
     epic_id = request.args.get('epic_id', type=int)
@@ -21,7 +21,7 @@ def index():
         return render_template('user_stories/index.html', stories=stories, epic=None)
 
 
-@user_stories_bp.route('/new', methods=['GET', 'POST'])
+@bp.route('/new', methods=['GET', 'POST'])
 @login_required
 def new():
     if request.method == 'POST':
@@ -55,14 +55,14 @@ def new():
     return render_template('user_stories/new.html', epics=epics, epic_id=epic_id)
 
 
-@user_stories_bp.route('/<int:story_id>')
+@bp.route('/<int:story_id>')
 @login_required
 def view(story_id):
     story = UserStory.query.get_or_404(story_id)
     return render_template('user_stories/view.html', story=story)
 
 
-@user_stories_bp.route('/<int:story_id>/add-comment', methods=['POST'])
+@bp.route('/<int:story_id>/add-comment', methods=['POST'])
 @login_required
 def add_comment(story_id):
     story = UserStory.query.get_or_404(story_id)

@@ -1,8 +1,8 @@
-from flask import Blueprint, current_app, redirect, request, url_for, session, current_app, flash, render_template
+from flask import Blueprint, current_app, redirect, request, url_for, session, render_template
 from flask_login import login_user, logout_user, current_user, login_required
 from iris.extensions import db
 from iris.models import User
-from iris.utils import flash_success, flash_error, flash_info
+from iris.utils.flash import flash_success, flash_error
 from datetime import datetime
 import uuid
 import msal

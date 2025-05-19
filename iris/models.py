@@ -39,6 +39,19 @@ class RetrospectiveCategory(enum.Enum):
     action_item = "action_item"
 
 
+# Association table for many-to-many relationship between users and roles
+user_roles = db.Table('user_roles',
+    db.Column('user_id', db.String(36), db.ForeignKey('users.id'), primary_key=True),
+    db.Column('role_id', db.Integer, db.ForeignKey('roles.id'), primary_key=True)
+)
+
+# Association table for many-to-many relationship between roles and permissions
+role_permissions = db.Table('role_permissions',
+    db.Column('role_id', db.Integer, db.ForeignKey('roles.id'), primary_key=True),
+    db.Column('permission_id', db.Integer, db.ForeignKey('permissions.id'), primary_key=True)
+)
+
+
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     
@@ -51,24 +64,39 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
     
-    # Relationships
+    # Add roles relationship
+    roles = db.relationship('Role', secondary=user_roles, backref=db.backref('users', lazy='dynamic'))
+    
+    # Existing relationships
     assigned_tasks = db.relationship('Task', backref='assigned_user', lazy=True, foreign_keys='Task.assignee_id')
     comments = db.relationship('Comment', backref='user', lazy=True)
     product_ideas = db.relationship('ProductIdea', backref='creator', lazy=True)
     epics = db.relationship('Epic', backref='creator', lazy=True)
     created_tasks = db.relationship('Task', backref='creator', lazy=True, foreign_keys='Task.creator_id')
-    
-    # New relationships for meetings
     standup_notes = db.relationship('StandupNote', backref='user', lazy=True)
-    # Fix: Specify which foreign key to use for the relationship
     action_items = db.relationship('ActionItem', backref='assignee', lazy=True, foreign_keys='ActionItem.assignee_id')
     created_action_items = db.relationship('ActionItem', backref='creator', lazy=True, foreign_keys='ActionItem.creator_id')
     retrospective_items = db.relationship('RetrospectiveItem', backref='user', lazy=True)
-    created_standups = db.relationship('StandupMeeting', backref='creator', lazy=True, foreign_keys='StandupMeeting.creator_id')
-    created_retrospectives = db.relationship('RetrospectiveMeeting', backref='creator', lazy=True, foreign_keys='RetrospectiveMeeting.creator_id')
-
+    
     def __repr__(self):
         return f"<User {self.email}>"
+    
+    # Role-based methods
+    def has_role(self, role_name):
+        """Check if user has a specific role by name"""
+        return any(role.name == role_name for role in self.roles)
+    
+    def has_permission(self, resource, action):
+        """Check if user has permission to perform action on resource"""
+        for role in self.roles:
+            for permission in role.permissions:
+                if permission.resource == resource and permission.action == action:
+                    return True
+        return False
+    
+    def is_admin(self):
+        """Shortcut to check if user is an admin"""
+        return self.has_role('admin')
 
 
 class ProductIdea(db.Model):
@@ -319,3 +347,34 @@ class ActionItem(db.Model):
     
     def __repr__(self):
         return f'<ActionItem {self.id}>'
+
+
+class Role(db.Model):
+    __tablename__ = 'roles'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.String(255))
+    is_system_role = db.Column(db.Boolean, default=False)  # Flag for system-defined roles
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+    
+    # Relationships
+    permissions = db.relationship('Permission', secondary=role_permissions, backref=db.backref('roles', lazy='dynamic'))
+    
+    def __repr__(self):
+        return f'<Role {self.name}>'
+
+
+class Permission(db.Model):
+    __tablename__ = 'permissions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.String(255))
+    resource = db.Column(db.String(50), nullable=False)  # e.g., 'product_idea', 'epic', etc.
+    action = db.Column(db.String(50), nullable=False)    # e.g., 'create', 'read', 'update', 'delete'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<Permission {self.name}>'

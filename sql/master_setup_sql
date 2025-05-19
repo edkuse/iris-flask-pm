@@ -1,0 +1,30 @@
+-- Master setup file for the database
+-- Run this file to create all tables and insert mock data
+
+-- Create users table
+\i sql/users.sql
+
+-- Create roles and permissions tables
+\i sql/roles.sql
+\i sql/permissions.sql
+\i sql/role_permissions.sql
+\i sql/user_roles.sql
+
+-- Create product management tables
+\i sql/product_ideas.sql
+\i sql/epics.sql
+\i sql/sprints.sql
+\i sql/user_stories.sql
+\i sql/tasks.sql
+
+-- Create meeting-related tables
+\i sql/meetings.sql
+\i sql/standup_notes.sql
+\i sql/action_items.sql
+\i sql/retrospective_items.sql
+
+-- Create comments table
+\i sql/comments.sql
+
+-- Print completion message
+SELECT 'Database setup completed successfully.' AS message;

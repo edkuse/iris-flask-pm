@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, request
 from iris.extensions import db
-from iris.models import Task, UserStory, Epic
+from iris.models import Epic, Task, UserStory
 
-kanban_bp = Blueprint('kanban', __name__)
+bp = Blueprint('kanban', __name__, url_prefix='/kanban')
 
 
-@kanban_bp.route('/')
+@bp.route('/')
 def index():
     epic_id = request.args.get('epic_id', type=int)
     assignee = request.args.get('assignee')

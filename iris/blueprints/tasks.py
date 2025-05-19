@@ -1,11 +1,11 @@
-from flask import Blueprint, flash, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import current_user, login_required
 from iris.extensions import db
 from iris.models import Comment, Task, UserStory, StatusEnum
-from iris.utils import flash_error, flash_success
+from iris.utils.flash import flash_error, flash_success
 from datetime import datetime
 
-bp = Blueprint('tasks', __name__)
+bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
 @bp.route('/')
@@ -16,6 +16,7 @@ def index():
         tasks = Task.query.filter_by(story_id=story_id).all()
         story = UserStory.query.get_or_404(story_id)
         return render_template('tasks/index.html', tasks=tasks, story=story)
+    
     else:
         tasks = Task.query.all()
         return render_template('tasks/index.html', tasks=tasks, story=None)
